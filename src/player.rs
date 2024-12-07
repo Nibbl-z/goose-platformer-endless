@@ -12,12 +12,12 @@ pub struct Player {
     pub touching_wall : i8,
     pub direction : bool,
     texture : Texture2D,
-    current_platform : Option<Vec<f32>>
+    current_platform : Option<(f32, f32)>
 }
 
-const GRAVITY : f32 = 6.0;
+const GRAVITY : f32 = 1000.0;
 const DRAG : f32 = 0.999;
-const PLATFORM_DRAG : f32 = 0.9;
+const PLATFORM_DRAG : f32 = 0.97;
 
 impl Player {
     pub async fn new() -> Player {
@@ -25,8 +25,8 @@ impl Player {
             dx : 0.0,
             dy : 0.0,
             rect : Rect{x : 0.0, y : 0.0, w : 50.0, h : 50.0},
-            jump_power : -700.0,
-            speed : 50.0,
+            jump_power : -500.0,
+            speed : 2000.0,
             on_ground : false,
             touching_wall : 0,
             direction : false,
@@ -46,23 +46,23 @@ impl Player {
     pub fn update(&mut self, dt : f32) {
         if is_key_down(KeyCode::D) && self.touching_wall != -1 {
             self.touching_wall = 0;
-            self.dx += self.speed;
+            self.dx += self.speed * dt;
             self.direction = true;
         }
 
         if is_key_down(KeyCode::A) && self.touching_wall != 1 {
             self.touching_wall = 0;
-            self.dx -= self.speed;
+            self.dx -= self.speed * dt;
             self.direction = false;
         }
 
-        if is_key_down(KeyCode::Space) && (self.on_ground || self.touching_wall != 0) {
+        if is_key_pressed(KeyCode::Space) && (self.on_ground || self.touching_wall != 0) {
             self.dy = self.jump_power;
             self.on_ground = false;
         }
 
         if !self.on_ground {
-            self.dy += GRAVITY;
+            self.dy += GRAVITY * dt;
             self.dy *= DRAG; 
         } else {
             self.dy = 0.0;
@@ -71,14 +71,14 @@ impl Player {
         self.dx *= PLATFORM_DRAG;
         
         if let Some(platform) = &self.current_platform {
-            if self.rect.x < platform[0] || self.rect.x > platform[1] { self.on_ground = false }
+            if self.rect.x < platform.0 || self.rect.x > platform.1 { self.on_ground = false }
         }
-
-        self.rect.y += self.dy * dt;
         self.rect.x += self.dx * dt;
-
+        self.rect.y += self.dy * dt;
+        
         self.touching_wall = 0;
     }
+    
     
     pub fn land(&mut self, platform : &Platform) {
         if self.dy < 0.0 { return; }
@@ -88,23 +88,20 @@ impl Player {
         self.rect.y = platform.rect.y - 50.0;
         self.on_ground = true;
         self.touching_wall = 0;
-        self.current_platform = Some(vec![platform.rect.x, platform.rect.x + platform.rect.w]);
+        self.current_platform = Some((platform.rect.x, platform.rect.x + platform.rect.w));
     }
     
     pub fn hit_side_wall(&mut self, platform : &Platform) {
         if self.rect.x <= platform.rect.x {
-            println!("Touching left of wall");
             self.touching_wall = -1;
             self.dx = 0.0;
-        } else if self.rect.x <= platform.rect.x + platform.rect.w {
-            println!("Touching right of wall");
+        } else {
             self.touching_wall = 1;
             self.dx = 0.0;
         }
     }
     
     pub fn hit_head(&mut self) {
-        println!("Doink!");
-        self.dy = 1.0;
+        self.dy = 10.0;
     }
 }

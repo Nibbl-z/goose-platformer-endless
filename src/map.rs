@@ -18,15 +18,23 @@ impl Platform {
     
     pub fn update(&self, player : &mut Player) {
         if self.rect.collides_with(&player.rect) {
-            if player.rect.y <= self.rect.y {
-                player.land(self);
-            } else if player.rect.y >= self.rect.y + self.rect.h - 10.0 && player.rect.x >= self.rect.x - 40.0 && player.rect.x <= self.rect.x + self.rect.w - 10.0 {
+            if player.rect.y >= self.rect.y + self.rect.h - 10.0 && player.rect.x >= self.rect.x - 40.0 && player.rect.x <= self.rect.x + self.rect.w - 10.0 {
                 player.hit_head(); 
-            } else if player.rect.y >= self.rect.y - 50.0 && player.rect.y < self.rect.y + self.rect.h {
+            } else if player.rect.y >= self.rect.y && player.rect.y < self.rect.y + self.rect.h {
                 player.hit_side_wall(self);
-            } else {
-                player.touching_wall = 0;
+            } else if player.rect.y + 50.0 >= self.rect.y {
+                player.land(self);
             }
         }
+    }
+    
+    pub fn generate_next(&self) -> Platform {
+        let x = rand::gen_range(100.0, 200.0) + self.rect.x + self.rect.w;
+        let y = rand::gen_range(-self.rect.h * 1.5, self.rect.h * -0.5) + self.rect.y + self.rect.h / 2.0;
+    
+        let w = rand::gen_range(150.0, 400.0);
+        let h = rand::gen_range(150.0, 500.0);
+
+        Platform::new(x,y,w,h)
     }
 }

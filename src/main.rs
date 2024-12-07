@@ -16,35 +16,43 @@ async fn main() {
     let mut player = Player::new().await;
     let mut platforms: Vec<Platform> = Vec::new();
     
-    platforms.push(Platform::new(200.0, 250.0, 300.0, 150.0));
-    platforms.push(Platform::new(600.0, 150.0, 300.0, 250.0));
-    platforms.push(Platform::new(400.0, 500.0, 200.0, 50.0));
-    platforms.push(Platform::new(0.0, 500.0, 700.0, 10.0));
-    loop {
+    let mut direction = false;
+
+    for i in 0..100 {
+        if i == 0 {
+            platforms.push(Platform::new(-100.0, 200.0, 200.0, 100.0));
+        } else {
+            platforms.push(platforms[i - 1].generate_next());
+        }
+
+        //if rand::gen_range(1, 4) == 1 { direction = true } else { direction = false }
+    }
+    
+    loop {   
         clear_background(WHITE);
         
         let dt = get_frame_time();
         player.update(dt);
         
-        /*let camera = Camera2D {
-            target: vec2(0.0, 0.0),
-            zoom: vec2(1.0 / screen_width(), 1.0 / screen_height()),
+        let camera = Camera2D {
+            target: vec2(player.rect.x, player.rect.y),
+            zoom: vec2(2.0 / screen_width(), 2.0 / screen_height()),
             ..Default::default()
-        };*/
-
-        //set_camera(&camera);
+        };
         
-        
+        set_camera(&camera);
 
         for platform in platforms.iter() {
             platform.draw();
             platform.update(&mut player);
         }
-
+        
         player.draw();
 
-        //set_default_camera();
+        set_default_camera();
         
+        let fps = (1.0 / dt).round();
+        draw_text(&format!("FPS: {}", fps), 10.0, 20.0, 30.0, BLACK);
         
         next_frame().await;
     }
