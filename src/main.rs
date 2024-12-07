@@ -1,5 +1,8 @@
+use goose_platformer_endless::player::Player;
 use macroquad::prelude::*;
+use goose_platformer_endless::map::Platform;
 
+#[allow(dead_code)]
 fn conf() -> Conf {
     Conf {
         window_title: String::from("Goose Platformer Endless"),
@@ -10,13 +13,35 @@ fn conf() -> Conf {
 
 #[macroquad::main("Goose Platformer Endless")]
 async fn main() {
-    let goose = load_texture("img/player.png").await.unwrap();
+    let mut player = Player::new().await;
+    let mut platforms: Vec<Platform> = Vec::new();
     
+    platforms.push(Platform::new(50.0, 400.0, 300.0, 50.0));
+    platforms.push(Platform::new(400.0, 500.0, 200.0, 50.0));
     loop {
         clear_background(WHITE);
         
-        draw_texture(&goose, 100.0, 100.0, WHITE);
+        let dt = get_frame_time();
+        player.update(dt);
+        
+        /*let camera = Camera2D {
+            target: vec2(0.0, 0.0),
+            zoom: vec2(1.0 / screen_width(), 1.0 / screen_height()),
+            ..Default::default()
+        };*/
 
+        //set_camera(&camera);
+        
+        player.draw();
+
+        for platform in platforms.iter() {
+            platform.draw();
+            platform.update(&mut player);
+        }
+
+        //set_default_camera();
+        
+        
         next_frame().await;
     }
 }
