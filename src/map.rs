@@ -15,10 +15,16 @@ impl Platform {
     pub fn draw(&self) {
         draw_rectangle(self.rect.x, self.rect.y, self.rect.w, self.rect.h, BLACK);
     }
-
+    
     pub fn update(&self, player : &mut Player) {
         if self.rect.collides_with(&player.rect) {
-            player.land(self);
+            if player.rect.y <= self.rect.y {
+                player.land(self);
+            } else if player.rect.y >= self.rect.y - 50.0 && player.rect.y < self.rect.y + self.rect.h {
+                player.hit_side_wall(self);
+            } else {
+                player.touching_wall = 0;
+            }
         }
     }
 }

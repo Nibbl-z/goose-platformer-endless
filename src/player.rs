@@ -9,6 +9,7 @@ pub struct Player {
     jump_power: f32,
     speed: f32,
     pub on_ground: bool,
+    pub touching_wall : i8,
     pub direction : bool,
     texture : Texture2D,
     current_platform : Option<Vec<f32>>
@@ -27,6 +28,7 @@ impl Player {
             jump_power : -700.0,
             speed : 50.0,
             on_ground : false,
+            touching_wall : 0,
             direction : false,
             texture : load_texture("img/player.png").await.unwrap(),
             current_platform : None
@@ -40,19 +42,21 @@ impl Player {
             ..Default::default()
         });
     }
-
+    
     pub fn update(&mut self, dt : f32) {
-        if is_key_down(KeyCode::D) {
+        if is_key_down(KeyCode::D) && self.touching_wall != -1 {
+            self.touching_wall = 0;
             self.dx += self.speed;
             self.direction = true;
         }
 
-        if is_key_down(KeyCode::A) {
+        if is_key_down(KeyCode::A) && self.touching_wall != 1 {
+            self.touching_wall = 0;
             self.dx -= self.speed;
             self.direction = false;
         }
 
-        if is_key_down(KeyCode::Space) && self.on_ground {
+        if is_key_down(KeyCode::Space) && (self.on_ground || self.touching_wall != 0) {
             self.dy = self.jump_power;
             self.on_ground = false;
         }
@@ -63,7 +67,7 @@ impl Player {
         } else {
             self.dy = 0.0;
         }
-
+        
         self.dx *= PLATFORM_DRAG;
         
         if let Some(platform) = &self.current_platform {
@@ -72,11 +76,29 @@ impl Player {
 
         self.rect.y += self.dy * dt;
         self.rect.x += self.dx * dt;
+
+        self.touching_wall = 0;
     }
     
     pub fn land(&mut self, platform : &Platform) {
-        self.rect.y = platform.rect.y - platform.rect.h;
+        if self.dy < 0.0 { return; }
+        if self.rect.x <= platform.rect.x - 40.0 {return;}
+        if self.rect.x >= platform.rect.x + platform.rect.w - 10.0 {return;}
+        self.rect.y = platform.rect.y - 50.0;
         self.on_ground = true;
+        self.touching_wall = 0;
         self.current_platform = Some(vec![platform.rect.x, platform.rect.x + platform.rect.w]);
+    }
+    
+    pub fn hit_side_wall(&mut self, platform : &Platform) {
+        if self.rect.x <= platform.rect.x {
+            println!("Touching left of wall");
+            self.touching_wall = -1;
+            self.dx = 0.0;
+        } else if self.rect.x <= platform.rect.x + platform.rect.w {
+            println!("Touching right of wall");
+            self.touching_wall = 1;
+            self.dx = 0.0;
+        }
     }
 }
