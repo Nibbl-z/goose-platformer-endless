@@ -84,6 +84,7 @@ impl Player {
         if self.dy < 0.0 { return; }
         if self.rect.x <= platform.rect.x - 40.0 {return;}
         if self.rect.x >= platform.rect.x + platform.rect.w - 10.0 {return;}
+        
         self.rect.y = platform.rect.y - 50.0;
         self.on_ground = true;
         self.touching_wall = 0;
@@ -100,5 +101,10 @@ impl Player {
             self.touching_wall = 1;
             self.dx = 0.0;
         }
+    }
+    
+    pub fn hit_head(&mut self) {
+        println!("Doink!");
+        self.dy = 1.0;
     }
 }

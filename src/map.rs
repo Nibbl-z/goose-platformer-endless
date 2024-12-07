@@ -20,6 +20,8 @@ impl Platform {
         if self.rect.collides_with(&player.rect) {
             if player.rect.y <= self.rect.y {
                 player.land(self);
+            } else if player.rect.y >= self.rect.y + self.rect.h - 10.0 && player.rect.x >= self.rect.x - 40.0 && player.rect.x <= self.rect.x + self.rect.w - 10.0 {
+                player.hit_head(); 
             } else if player.rect.y >= self.rect.y - 50.0 && player.rect.y < self.rect.y + self.rect.h {
                 player.hit_side_wall(self);
             } else {
