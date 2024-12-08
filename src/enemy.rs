@@ -16,13 +16,13 @@ impl Enemy {
             direction: false,
             texture: load_texture("img/enemy.png").await.unwrap(),
             recorded_positions: Vec::new(),
-            delay: 100,
+            delay: 50,
         }
     }
     
     pub fn update(&mut self, player: &Player) {
         self.recorded_positions.push((player.rect.x, player.rect.y, player.direction));
-
+        
         // If we have enough recorded positions, update the ghost's position
         if self.recorded_positions.len() > self.delay {
             let (x, y, direction) = self.recorded_positions.remove(0);

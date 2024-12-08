@@ -2,6 +2,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 use enemy::Enemy;
 use goose_platformer_endless::player::Player;
+use lava::Lava;
 use macroquad::{prelude::*, rand::srand};
 use goose_platformer_endless::*;
 use map::Platform;
@@ -25,6 +26,7 @@ async fn main() {
     let mut player = Player::new().await;
     let mut enemy = Enemy::new().await;
     let mut platforms: Vec<Platform> = Vec::new();
+    let mut lava = Lava::new().await; 
     
     let mut direction = true;
     
@@ -53,6 +55,8 @@ async fn main() {
             enemy.update(&player);
             fixed_timer -= fixed_update_interval;
         }
+
+        lava.update(dt, &player);
         
         let camera = Camera2D {
             target: vec2(player.rect.x, player.rect.y),
@@ -61,7 +65,7 @@ async fn main() {
         };
         
         set_camera(&camera);
-
+        
         for platform in platforms.iter() {
             platform.draw();
             platform.update(&mut player);
@@ -69,11 +73,12 @@ async fn main() {
         
         player.draw();
         enemy.draw();
+        lava.draw();
         
         set_default_camera();
         
         let fps = (1.0 / dt).round();
-        draw_text(&format!("FPS: {}", fps), 10.0, 20.0, 30.0, BLACK);
+        draw_text(&format!("FPS: {}", lava.y), 10.0, 20.0, 30.0, BLACK);
         
         next_frame().await;
     }
