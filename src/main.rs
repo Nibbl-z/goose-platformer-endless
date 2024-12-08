@@ -1,6 +1,10 @@
+use std::time::{SystemTime, UNIX_EPOCH};
+
+use enemy::Enemy;
 use goose_platformer_endless::player::Player;
-use macroquad::prelude::*;
-use goose_platformer_endless::map::Platform;
+use macroquad::{prelude::*, rand::srand};
+use goose_platformer_endless::*;
+use map::Platform;
 
 #[allow(dead_code)]
 fn conf() -> Conf {
@@ -13,19 +17,28 @@ fn conf() -> Conf {
 
 #[macroquad::main("Goose Platformer Endless")]
 async fn main() {
+    let start = SystemTime::now();
+    let since_the_epoch = start.duration_since(UNIX_EPOCH).expect("Time went backwards");
+    let seed = since_the_epoch.as_secs() as u64;
+    srand(seed);
+    
     let mut player = Player::new().await;
+    let mut enemy = Enemy::new().await;
     let mut platforms: Vec<Platform> = Vec::new();
     
-    let mut direction = false;
-
+    let mut direction = true;
+    
+    let mut fixed_timer = 0.0;
+    let fixed_update_interval = 1.0 / 60.0;
+    
     for i in 0..100 {
         if i == 0 {
             platforms.push(Platform::new(-100.0, 200.0, 200.0, 100.0));
         } else {
-            platforms.push(platforms[i - 1].generate_next());
+            platforms.push(platforms[i - 1].generate_next(direction));
         }
-
-        //if rand::gen_range(1, 4) == 1 { direction = true } else { direction = false }
+        
+        if rand::gen_range(1, 10) == 5 { direction = !direction }
     }
     
     loop {   
@@ -33,6 +46,13 @@ async fn main() {
         
         let dt = get_frame_time();
         player.update(dt);
+
+        fixed_timer += dt;
+
+        if fixed_timer >= fixed_update_interval {
+            enemy.update(&player);
+            fixed_timer -= fixed_update_interval;
+        }
         
         let camera = Camera2D {
             target: vec2(player.rect.x, player.rect.y),
@@ -48,7 +68,8 @@ async fn main() {
         }
         
         player.draw();
-
+        enemy.draw();
+        
         set_default_camera();
         
         let fps = (1.0 / dt).round();

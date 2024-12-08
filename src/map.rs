@@ -28,13 +28,17 @@ impl Platform {
         }
     }
     
-    pub fn generate_next(&self) -> Platform {
-        let x = rand::gen_range(100.0, 200.0) + self.rect.x + self.rect.w;
+    pub fn generate_next(&self, direction : bool) -> Platform {
+        let x = if direction == true { 
+            rand::gen_range(100.0, 200.0) + self.rect.x + self.rect.w 
+        } else {
+            self.rect.x - self.rect.w - rand::gen_range(100.0, 200.0)
+        };
         let y = rand::gen_range(-self.rect.h * 1.5, self.rect.h * -0.5) + self.rect.y + self.rect.h / 2.0;
     
         let w = rand::gen_range(150.0, 400.0);
         let h = rand::gen_range(150.0, 500.0);
-
+        
         Platform::new(x,y,w,h)
     }
 }
