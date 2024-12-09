@@ -1,6 +1,6 @@
 use macroquad::prelude::*;
 
-use crate::player::Player;
+use crate::player::{self, Player};
 
 const DEFAULT_SPEED : f32 = 100.0;
 
@@ -30,10 +30,12 @@ impl Lava {
         self.y -= self.speed * dt;
     }
     
-    pub fn draw(&self) {
-        for x in -500..500 {
-            for y in 0..20 {
-                draw_texture_ex(&self.texture, x as f32 * 200.0,(y as f32) * 200.0 + self.y , WHITE, DrawTextureParams {
+    pub fn draw(&self, player : &Player) {
+        for x in -5..5 {
+            for y in 0..5 {
+                let xOffset = (player.rect.x / 200.0).floor() * 200.0;
+
+                draw_texture_ex(&self.texture, x as f32 * 200.0 + xOffset,(y as f32) * 200.0 + self.y , WHITE, DrawTextureParams {
                     dest_size: Some(vec2(200.0, 200.0)),
                     ..Default::default()
                 });

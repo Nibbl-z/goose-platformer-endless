@@ -37,10 +37,12 @@ async fn main() {
         if i == 0 {
             platforms.push(Platform::new(-100.0, 200.0, 200.0, 100.0));
         } else {
-            platforms.push(platforms[i - 1].generate_next(direction));
+            let start_slice = if i > 10 {i - 10} else {0};
+
+            platforms.push(platforms[i - 1].generate_next(direction, &platforms[start_slice..i - 1]));
         }
         
-        if rand::gen_range(1, 10) == 5 { direction = !direction }
+        if rand::gen_range(1, 7) == 5 { direction = !direction }
     }
     
     loop {   
@@ -73,12 +75,12 @@ async fn main() {
         
         player.draw();
         enemy.draw();
-        lava.draw();
+        lava.draw(&player);
         
         set_default_camera();
         
         let fps = (1.0 / dt).round();
-        draw_text(&format!("FPS: {}", lava.y), 10.0, 20.0, 30.0, BLACK);
+        draw_text(&format!("FPS: {}", fps), 10.0, 20.0, 30.0, BLACK);
         
         next_frame().await;
     }

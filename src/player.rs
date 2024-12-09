@@ -6,6 +6,7 @@ pub struct Player {
     pub rect : Rect,
     dx : f32,
     dy : f32,
+    accel : f32,
     jump_power: f32,
     speed: f32,
     pub on_ground: bool,
@@ -17,16 +18,18 @@ pub struct Player {
 
 const GRAVITY : f32 = 1000.0;
 const DRAG : f32 = 0.999;
-const PLATFORM_DRAG : f32 = 0.97;
+const PLATFORM_DRAG : f32 = 0.6;
+const ACCEL : f32 = 100.0;
 
 impl Player {
     pub async fn new() -> Player {
         Player {
             dx : 0.0,
             dy : 0.0,
+            accel : 0.0,
             rect : Rect{x : 0.0, y : 0.0, w : 50.0, h : 50.0},
             jump_power : -700.0,
-            speed : 4000.0,
+            speed : 40000.0,
             on_ground : false,
             touching_wall : 0,
             direction : false,
@@ -46,13 +49,13 @@ impl Player {
     pub fn update(&mut self, dt : f32) {
         if is_key_down(KeyCode::D) && self.touching_wall != -1 {
             self.touching_wall = 0;
-            self.dx += self.speed * dt;
+            self.dx = self.speed * dt;
             self.direction = true;
         }
 
         if is_key_down(KeyCode::A) && self.touching_wall != 1 {
             self.touching_wall = 0;
-            self.dx -= self.speed * dt;
+            self.dx = -self.speed * dt;
             self.direction = false;
         }
 
