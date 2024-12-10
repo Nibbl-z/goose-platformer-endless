@@ -19,6 +19,13 @@ impl Enemy {
             delay: 50,
         }
     }
+
+    pub fn reset(&mut self) {
+        self.recorded_positions.clear();
+        self.rect.x = 0.0;
+        self.rect.y = 0.0;
+        self.direction = false;
+    }
     
     pub fn update(&mut self, player: &mut Player) {
         self.recorded_positions.push((player.rect.x, player.rect.y, player.direction));
@@ -31,6 +38,10 @@ impl Enemy {
 
             if self.rect.collides_with(&player.rect) {
                 player.died = true;
+
+                if player.died_time == -1.0 {
+                    player.died_time = macroquad::time::get_time();
+                }
             }
         }
     }

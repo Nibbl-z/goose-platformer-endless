@@ -14,13 +14,14 @@ pub struct Player {
     pub direction : bool,
     texture : Texture2D,
     current_platform : Option<(f32, f32)>,
-    pub died : bool
+    pub died : bool,
+    pub score : u64,
+    pub died_time : f64
 }
 
 const GRAVITY : f32 = 1000.0;
 const DRAG : f32 = 0.999;
 const PLATFORM_DRAG : f32 = 0.6;
-const ACCEL : f32 = 0.1;
 
 impl Player {
     pub async fn new() -> Player {
@@ -29,15 +30,25 @@ impl Player {
             dy : 0.0,
             rect : Rect{x : 0.0, y : 0.0, w : 50.0, h : 50.0},
             jump_power : -700.0,
-            speed : 100000.0,
+            speed : 200000.0,
             on_ground : false,
             coyote_time : 0,
             touching_wall : 0,
             direction : false,
             texture : load_texture("img/player.png").await.unwrap(),
             current_platform : None,
-            died : false
+            died : false,
+            score : 0,
+            died_time : -1.0
         }
+    }
+
+    pub fn reset(&mut self) {
+        self.rect.x = 0.0;
+        self.rect.y = 0.0;
+        self.died = false;
+        self.score = 0;
+        self.died_time = -1.0;
     }
     
     pub fn draw(&self) {
@@ -49,17 +60,19 @@ impl Player {
     }
     
     pub fn fixed_update(&mut self) {
-        
         if self.coyote_time > 0 {
             self.coyote_time -= 1;
         }
-        
+
+        self.score += 10;
     }
     
     pub fn update(&mut self, dt : f32) {
+        if self.died {return;}
+
         if is_key_down(KeyCode::D) && self.touching_wall != -1 {
             if self.touching_wall == 1 {
-                self.coyote_time = 5
+                self.coyote_time = 8
             }
             self.touching_wall = 0;
             self.dx = self.speed * dt;
@@ -68,7 +81,7 @@ impl Player {
 
         if is_key_down(KeyCode::A) && self.touching_wall != 1 {
             if self.touching_wall == -1 {
-                self.coyote_time = 5
+                self.coyote_time = 8
             }
             self.touching_wall = 0;
             self.dx = -self.speed * dt;
@@ -79,7 +92,7 @@ impl Player {
             self.dy = self.jump_power;
             self.on_ground = false;
         }
-
+        
         if !self.on_ground {
             self.dy += GRAVITY * dt;
             self.dy *= DRAG; 
@@ -90,7 +103,13 @@ impl Player {
         self.dx *= PLATFORM_DRAG;
         
         if let Some(platform) = &self.current_platform {
-            if self.rect.x < platform.0 || self.rect.x > platform.1 { self.on_ground = false }
+            if self.rect.x < platform.0 || self.rect.x > platform.1 { 
+                if self.on_ground == true {
+                    self.coyote_time = 8;
+                }
+                self.on_ground = false;
+                
+            }
         }
         self.rect.x += self.dx * dt;
         self.rect.y += self.dy * dt;

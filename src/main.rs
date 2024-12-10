@@ -6,6 +6,7 @@ use lava::Lava;
 use macroquad::{prelude::*, rand::srand};
 use goose_platformer_endless::*;
 use map::Platform;
+use interfaces::GameOver;
 
 #[allow(dead_code)]
 fn conf() -> Conf {
@@ -13,6 +14,22 @@ fn conf() -> Conf {
         window_title: String::from("Goose Platformer Endless"),
         fullscreen: false,
         ..Default::default()
+    }
+}
+
+fn create_map(platforms : &mut Vec<Platform>) {
+    let mut direction = true;
+
+    for i in 0..1000 {
+        if i == 0 {
+            platforms.push(Platform::new(-100.0, 200.0, 200.0, 100.0));
+        } else {
+            let start_slice = if i > 10 {i - 10} else {0};
+
+            platforms.push(platforms[i - 1].generate_next(direction, &platforms[start_slice..i - 1]));
+        }
+        
+        if rand::gen_range(1, 7) == 5 { direction = !direction }
     }
 }
 
@@ -28,22 +45,14 @@ async fn main() {
     let mut platforms: Vec<Platform> = Vec::new();
     let mut lava = Lava::new().await; 
     
-    let mut direction = true;
+    create_map(&mut platforms);
     
     let mut fixed_timer = 0.0;
     let fixed_update_interval = 1.0 / 60.0;
     
-    for i in 0..1000 {
-        if i == 0 {
-            platforms.push(Platform::new(-100.0, 200.0, 200.0, 100.0));
-        } else {
-            let start_slice = if i > 10 {i - 10} else {0};
-
-            platforms.push(platforms[i - 1].generate_next(direction, &platforms[start_slice..i - 1]));
-        }
-        
-        if rand::gen_range(1, 7) == 5 { direction = !direction }
-    }
+    let mut game_over_interface = GameOver::init().await;
+    
+    
     
     loop {   
         clear_background(WHITE);
@@ -81,12 +90,19 @@ async fn main() {
         lava.draw(&player);
         
         set_default_camera();
-        
-        let fps = (1.0 / dt).round();
-        draw_text(&format!("FPS: {}", fps), 10.0, 20.0, 30.0, BLACK);
+
+        draw_text(&format!("SCORE: {}", player.score), 10.0, 20.0, 30.0, BLACK);
 
         if player.died {
-            draw_text("you died stoopu doopu", 200.0, 200.0, 30.0, RED);
+            if game_over_interface.update(player.died_time) == true {
+                player.reset();
+                enemy.reset();
+                lava.y = 600.0;
+
+                platforms.clear();
+                create_map(&mut platforms);
+            };
+            game_over_interface.draw();
         }
         
         next_frame().await;
