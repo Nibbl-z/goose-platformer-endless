@@ -19,32 +19,30 @@ impl Lava {
         }
     }
     
-    pub fn update(&mut self, dt : f32, player : &Player) {
+    pub fn update(&mut self, dt : f32, player : &mut Player) {
         self.speed = if player.rect.y <= self.y - 600.0 {
             DEFAULT_SPEED * 7.0
         } else {
             DEFAULT_SPEED
         };
         
-
+        if player.rect.y + 50.0 >= self.y + 1000.0 {
+            player.died = true;
+        }
+        
         self.y -= self.speed * dt;
     }
     
     pub fn draw(&self, player : &Player) {
-        for x in -5..5 {
+        for x in -8..8 {
             for y in 0..5 {
                 let x_offset = (player.rect.x / 200.0).floor() * 200.0;
-
+                
                 draw_texture_ex(&self.texture, x as f32 * 200.0 + x_offset,(y as f32) * 200.0 + self.y , WHITE, DrawTextureParams {
                     dest_size: Some(vec2(200.0, 200.0)),
                     ..Default::default()
                 });
             }
         }
-        
-        draw_texture_ex(&self.texture, 200.0, 200.0, WHITE, DrawTextureParams {
-            dest_size: Some(vec2(200.0, 200.0)),
-            ..Default::default()
-        });
     }
 }

@@ -20,15 +20,18 @@ impl Enemy {
         }
     }
     
-    pub fn update(&mut self, player: &Player) {
+    pub fn update(&mut self, player: &mut Player) {
         self.recorded_positions.push((player.rect.x, player.rect.y, player.direction));
         
-        // If we have enough recorded positions, update the ghost's position
         if self.recorded_positions.len() > self.delay {
             let (x, y, direction) = self.recorded_positions.remove(0);
             self.rect.x = x;
             self.rect.y = y;
-            self.direction = direction
+            self.direction = direction;
+
+            if self.rect.collides_with(&player.rect) {
+                player.died = true;
+            }
         }
     }
     

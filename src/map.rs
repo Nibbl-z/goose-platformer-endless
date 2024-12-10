@@ -29,7 +29,11 @@ impl Platform {
     }
     
     pub fn generate_next(&self, direction : bool, previous_batch : &[Platform]) -> Platform {
+        let mut give_up = 0;
+
         loop {
+            give_up += 1;
+            let mut collides = false;
             let x = if direction == true { 
                 rand::gen_range(100.0, 200.0) + self.rect.x + self.rect.w 
             } else {
@@ -40,8 +44,8 @@ impl Platform {
             let w = rand::gen_range(150.0, 400.0);
             let h = rand::gen_range(150.0, 500.0);
             
-            let mut collides = false;
-
+            let created_platform = Platform::new(x, y, w, h);
+            
             for platform in previous_batch {
                 if (Rect {
                     x : x - 40.0, 
@@ -54,9 +58,13 @@ impl Platform {
                 }
             }
 
-            if collides { continue; }
+            if !collides {
+                break created_platform
+            }
 
-            break Platform::new(x,y,w,h)
+            if give_up >= 50 {
+                break created_platform
+            }
         }
         
     }

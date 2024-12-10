@@ -6,7 +6,6 @@ pub struct Player {
     pub rect : Rect,
     dx : f32,
     dy : f32,
-    accel : f32,
     jump_power: f32,
     speed: f32,
     coyote_time : u32,
@@ -14,29 +13,30 @@ pub struct Player {
     pub touching_wall : i8,
     pub direction : bool,
     texture : Texture2D,
-    current_platform : Option<(f32, f32)>
+    current_platform : Option<(f32, f32)>,
+    pub died : bool
 }
 
 const GRAVITY : f32 = 1000.0;
 const DRAG : f32 = 0.999;
 const PLATFORM_DRAG : f32 = 0.6;
-const ACCEL : f32 = 0.02;
+const ACCEL : f32 = 0.1;
 
 impl Player {
     pub async fn new() -> Player {
         Player {
             dx : 0.0,
             dy : 0.0,
-            accel : 1.0,
             rect : Rect{x : 0.0, y : 0.0, w : 50.0, h : 50.0},
             jump_power : -700.0,
-            speed : 20000.0,
+            speed : 100000.0,
             on_ground : false,
             coyote_time : 0,
             touching_wall : 0,
             direction : false,
             texture : load_texture("img/player.png").await.unwrap(),
-            current_platform : None
+            current_platform : None,
+            died : false
         }
     }
     
@@ -47,11 +47,8 @@ impl Player {
             ..Default::default()
         });
     }
-
+    
     pub fn fixed_update(&mut self) {
-        if is_key_down(KeyCode::D) || is_key_down(KeyCode::A) && self.accel <= 2.0 {
-            self.accel += ACCEL;
-        }
         
         if self.coyote_time > 0 {
             self.coyote_time -= 1;
@@ -95,7 +92,7 @@ impl Player {
         if let Some(platform) = &self.current_platform {
             if self.rect.x < platform.0 || self.rect.x > platform.1 { self.on_ground = false }
         }
-        self.rect.x += self.dx * dt * self.accel;
+        self.rect.x += self.dx * dt;
         self.rect.y += self.dy * dt;
         
         self.touching_wall = 0;

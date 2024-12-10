@@ -33,7 +33,7 @@ async fn main() {
     let mut fixed_timer = 0.0;
     let fixed_update_interval = 1.0 / 60.0;
     
-    for i in 0..100 {
+    for i in 0..1000 {
         if i == 0 {
             platforms.push(Platform::new(-100.0, 200.0, 200.0, 100.0));
         } else {
@@ -54,12 +54,12 @@ async fn main() {
         fixed_timer += dt;
 
         if fixed_timer >= fixed_update_interval {
-            enemy.update(&player);
+            enemy.update(&mut player);
             player.fixed_update();
             fixed_timer -= fixed_update_interval;
         }
 
-        lava.update(dt, &player);
+        lava.update(dt, &mut player);
         
         let camera = Camera2D {
             target: vec2(player.rect.x, player.rect.y),
@@ -70,8 +70,10 @@ async fn main() {
         set_camera(&camera);
         
         for platform in platforms.iter() {
-            platform.draw();
-            platform.update(&mut player);
+            if platform.rect.in_camera_view(&camera) {
+                platform.draw();
+                platform.update(&mut player);
+            }
         }
         
         player.draw();
@@ -82,6 +84,10 @@ async fn main() {
         
         let fps = (1.0 / dt).round();
         draw_text(&format!("FPS: {}", fps), 10.0, 20.0, 30.0, BLACK);
+
+        if player.died {
+            draw_text("you died stoopu doopu", 200.0, 200.0, 30.0, RED);
+        }
         
         next_frame().await;
     }
