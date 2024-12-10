@@ -33,9 +33,9 @@ impl Lava {
     pub fn draw(&self, player : &Player) {
         for x in -5..5 {
             for y in 0..5 {
-                let xOffset = (player.rect.x / 200.0).floor() * 200.0;
+                let x_offset = (player.rect.x / 200.0).floor() * 200.0;
 
-                draw_texture_ex(&self.texture, x as f32 * 200.0 + xOffset,(y as f32) * 200.0 + self.y , WHITE, DrawTextureParams {
+                draw_texture_ex(&self.texture, x as f32 * 200.0 + x_offset,(y as f32) * 200.0 + self.y , WHITE, DrawTextureParams {
                     dest_size: Some(vec2(200.0, 200.0)),
                     ..Default::default()
                 });

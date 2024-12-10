@@ -55,6 +55,7 @@ async fn main() {
 
         if fixed_timer >= fixed_update_interval {
             enemy.update(&player);
+            player.fixed_update();
             fixed_timer -= fixed_update_interval;
         }
 
