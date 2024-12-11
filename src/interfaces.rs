@@ -1,5 +1,5 @@
 use macroquad::prelude::*;
-use crate::collision::Rect;
+use crate::{collision::Rect, player::Player};
 
 pub struct GameOver {
     text_fade : f32,
@@ -25,7 +25,7 @@ impl GameOver {
         self.bg_fade = 0.0;
     }
     
-    pub fn draw(&self) {
+    pub fn draw(&self, player : &Player) {
         draw_rectangle(-5000.0,  -5000.0, 10000.0, 10000.0, Color::new(1.0, 0.0, 0.0, self.bg_fade));
         draw_texture(
             &self.text_image, 
@@ -49,12 +49,20 @@ impl GameOver {
                 &self.btn_tex
             }
         };
-
+        
         draw_texture(
             texture, 
             (screen_width() - &self.text_image.width()) / 2.0, 
             (screen_height() - &self.text_image.height()) / 2.0 + 200.0, 
             WHITE
+        );
+        
+        draw_text(
+            &format!("FINAL SCORE: {}", player.score), 
+            (screen_width() - &self.text_image.width()) / 2.0, 
+            (screen_height() - &self.text_image.height()) / 2.0 + 450.0,
+            70.0,
+            Color::new(1.0, 1.0, 1.0, self.text_fade)
         );
 
         
@@ -80,7 +88,7 @@ impl GameOver {
                 return true;
             }
         }
-
+        
         false
     }
 }

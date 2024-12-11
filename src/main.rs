@@ -98,11 +98,10 @@ async fn main() {
         enemy.draw();
         lava.draw(&player);
         
-        
         set_default_camera();
         
         draw_text(&format!("SCORE: {}", player.score), 10.0, 40.0, 60.0, WHITE);
-
+        
         if player.died {
             if game_over_interface.update(player.died_time) == true {
                 player.reset();
@@ -112,7 +111,7 @@ async fn main() {
                 platforms.clear();
                 create_map(&mut platforms, 0);
             };
-            game_over_interface.draw();
+            game_over_interface.draw(&player);
         }
 
         if player.just_died {

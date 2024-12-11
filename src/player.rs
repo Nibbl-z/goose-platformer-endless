@@ -65,14 +65,16 @@ impl Player {
         if self.coyote_time > 0 {
             self.coyote_time -= 1;
         }
-
-        self.score += 10;
+        
+        if !self.died { 
+            self.score += 10; 
+        }
     }
     
     pub fn update(&mut self, dt : f32) {
-        if self.died {return;}
-
-        if is_key_down(KeyCode::D) && self.touching_wall != -1 {
+        if self.died { return }
+        
+        if is_key_down(KeyCode::D) && !is_key_down(KeyCode::A) && self.touching_wall != -1 {
             if self.touching_wall == 1 {
                 self.coyote_time = 8
             }
@@ -81,7 +83,7 @@ impl Player {
             self.direction = true;
         }
 
-        if is_key_down(KeyCode::A) && self.touching_wall != 1 {
+        if is_key_down(KeyCode::A) && !is_key_down(KeyCode::D) && self.touching_wall != 1 {
             if self.touching_wall == -1 {
                 self.coyote_time = 8
             }
@@ -89,7 +91,7 @@ impl Player {
             self.dx = -self.speed;
             self.direction = false;
         }
-
+        
         if is_key_pressed(KeyCode::Space) && (self.on_ground || self.touching_wall != 0 || self.coyote_time != 0) {
             self.dy = self.jump_power;
             self.on_ground = false;
