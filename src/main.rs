@@ -7,6 +7,8 @@ use macroquad::{prelude::*, rand::srand};
 use goose_platformer_endless::*;
 use map::Platform;
 use interfaces::GameOver;
+use macroquad::audio::*;
+use bg::BG;
 
 #[allow(dead_code)]
 fn conf() -> Conf {
@@ -17,10 +19,10 @@ fn conf() -> Conf {
     }
 }
 
-fn create_map(platforms : &mut Vec<Platform>) {
+fn create_map(platforms : &mut Vec<Platform>, start_index : usize) {
     let mut direction = true;
-
-    for i in 0..1000 {
+    
+    for i in start_index..start_index + 10 {
         if i == 0 {
             platforms.push(Platform::new(-100.0, 200.0, 200.0, 100.0));
         } else {
@@ -44,15 +46,22 @@ async fn main() {
     let mut enemy = Enemy::new().await;
     let mut platforms: Vec<Platform> = Vec::new();
     let mut lava = Lava::new().await; 
-    
-    create_map(&mut platforms);
+    let bg = BG::new().await;
+    let death_sfx = load_sound("audio/death.wav").await.unwrap();
+    let music = load_sound("audio/bg_music.ogg").await.unwrap();
+    create_map(&mut platforms, 0);
     
     let mut fixed_timer = 0.0;
     let fixed_update_interval = 1.0 / 60.0;
     
     let mut game_over_interface = GameOver::init().await;
     
+    let stone_texture = load_texture("img/stone.png").await.unwrap();
     
+    play_sound(&music, PlaySoundParams {
+        looped: true,
+        volume : 0.1
+    });
     
     loop {   
         clear_background(WHITE);
@@ -77,10 +86,10 @@ async fn main() {
         };
         
         set_camera(&camera);
-        
+        bg.draw(&player);
         for platform in platforms.iter() {
             if platform.rect.in_camera_view(&camera) {
-                platform.draw();
+                platform.draw(&stone_texture);
                 platform.update(&mut player);
             }
         }
@@ -89,9 +98,10 @@ async fn main() {
         enemy.draw();
         lava.draw(&player);
         
+        
         set_default_camera();
-
-        draw_text(&format!("SCORE: {}", player.score), 10.0, 20.0, 30.0, BLACK);
+        
+        draw_text(&format!("SCORE: {}", player.score), 10.0, 40.0, 60.0, WHITE);
 
         if player.died {
             if game_over_interface.update(player.died_time) == true {
@@ -100,9 +110,22 @@ async fn main() {
                 lava.y = 600.0;
 
                 platforms.clear();
-                create_map(&mut platforms);
+                create_map(&mut platforms, 0);
             };
             game_over_interface.draw();
+        }
+
+        if player.just_died {
+            play_sound(&death_sfx, PlaySoundParams {
+                looped: false,
+                volume : 1.0
+            });
+            player.just_died = false;
+        }
+        
+        let platforms_len = platforms.len();
+        if vec2(player.rect.x, player.rect.y).distance(vec2(platforms.last().unwrap().rect.x, platforms.last().unwrap().rect.y)) <= 3000.0 {
+            create_map(&mut platforms, platforms_len);
         }
         
         next_frame().await;

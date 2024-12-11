@@ -4,3 +4,4 @@ pub mod map;
 pub mod enemy;
 pub mod lava;
 pub mod interfaces;
+pub mod bg;

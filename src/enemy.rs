@@ -38,8 +38,9 @@ impl Enemy {
 
             if self.rect.collides_with(&player.rect) {
                 player.died = true;
-
+                
                 if player.died_time == -1.0 {
+                    player.just_died = true;
                     player.died_time = macroquad::time::get_time();
                 }
             }

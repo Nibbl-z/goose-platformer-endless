@@ -1,6 +1,6 @@
 use macroquad::prelude::*;
 
-use crate::player::{self, Player};
+use crate::player::Player;
 
 const DEFAULT_SPEED : f32 = 100.0;
 
@@ -26,9 +26,11 @@ impl Lava {
             DEFAULT_SPEED
         };
         
-        if player.rect.y + 50.0 >= self.y + 1000.0 {
+        if player.rect.y + 50.0 >= self.y {
             player.died = true;
+            
             if player.died_time == -1.0 {
+                player.just_died = true;
                 player.died_time = macroquad::time::get_time();
             }
         }
@@ -38,7 +40,7 @@ impl Lava {
     
     pub fn draw(&self, player : &Player) {
         for x in -8..8 {
-            for y in 0..10 {
+            for y in 0..5 {
                 let x_offset = (player.rect.x / 200.0).floor() * 200.0;
                 
                 draw_texture_ex(&self.texture, x as f32 * 200.0 + x_offset,(y as f32) * 200.0 + self.y , WHITE, DrawTextureParams {

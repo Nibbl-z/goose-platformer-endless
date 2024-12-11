@@ -12,8 +12,11 @@ impl Platform {
         }
     }
     
-    pub fn draw(&self) {
-        draw_rectangle(self.rect.x, self.rect.y, self.rect.w, self.rect.h, BLACK);
+    pub fn draw(&self, texture : &Texture2D) {
+        draw_texture_ex(texture, self.rect.x, self.rect.y, WHITE, DrawTextureParams {
+            dest_size : Some(vec2(self.rect.w, self.rect.h)),
+            ..Default::default()
+        });
     }
     
     pub fn update(&self, player : &mut Player) {

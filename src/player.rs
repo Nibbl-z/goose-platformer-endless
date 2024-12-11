@@ -15,6 +15,7 @@ pub struct Player {
     texture : Texture2D,
     current_platform : Option<(f32, f32)>,
     pub died : bool,
+    pub just_died : bool,
     pub score : u64,
     pub died_time : f64
 }
@@ -30,7 +31,7 @@ impl Player {
             dy : 0.0,
             rect : Rect{x : 0.0, y : 0.0, w : 50.0, h : 50.0},
             jump_power : -700.0,
-            speed : 200000.0,
+            speed : 1000.0,
             on_ground : false,
             coyote_time : 0,
             touching_wall : 0,
@@ -38,6 +39,7 @@ impl Player {
             texture : load_texture("img/player.png").await.unwrap(),
             current_platform : None,
             died : false,
+            just_died : false,
             score : 0,
             died_time : -1.0
         }
@@ -75,7 +77,7 @@ impl Player {
                 self.coyote_time = 8
             }
             self.touching_wall = 0;
-            self.dx = self.speed * dt;
+            self.dx = self.speed;
             self.direction = true;
         }
 
@@ -84,7 +86,7 @@ impl Player {
                 self.coyote_time = 8
             }
             self.touching_wall = 0;
-            self.dx = -self.speed * dt;
+            self.dx = -self.speed;
             self.direction = false;
         }
 

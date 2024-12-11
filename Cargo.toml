@@ -7,5 +7,5 @@ edition = "2021"
 opt-level = 3
 
 [dependencies]
-macroquad = "0.4.13"
+macroquad = {version = "0.4.13", features = ["audio"]}
 rand = "0.8"
